@@ -1,33 +1,150 @@
 import argparse
+import base64
+import json
+import urllib.request
+
+from merkle_proof import (DefaultHasher, compute_leaf_hash, verify_consistency,
+                          verify_inclusion)
 from util import extract_public_key, verify_artifact_signature
-from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, compute_leaf_hash
+
+
+REKOR_BASE_URL = "https://rekor.sigstore.dev"
+
+
+def fetch_log_entry(log_index, debug=False):
+    """Fetch a single log entry from Rekor for the given global log index."""
+    url = f"{REKOR_BASE_URL}/api/v1/log/entries?logIndex={log_index}"
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        raw = resp.read().decode("utf-8")
+    entries = json.loads(raw)
+
+    # The API returns a map keyed by the entry UUID; there should be one entry.
+    entries_list = list(entries.values())
+    if len(entries_list) != 1:
+        raise ValueError(f"Expected exactly one log entry for index {log_index}, got {len(entries_list)}")
+
+    return entries_list[0]
+
+
+def get_log_body(log_index, debug=False):
+    """Fetch the log entry and return its decoded body as a Python object."""
+    entry = fetch_log_entry(log_index, debug)
+    body = json.loads(base64.b64decode(entry["body"]).decode("utf-8"))
+    return entry, body
+
 
 def get_log_entry(log_index, debug=False):
-    # TODO: verify that log index value is sane
-    pass
+    # verify that log index value is sane
+    if not isinstance(log_index, int) or log_index < 0:
+        raise ValueError(f"Invalid log index: {log_index}")
+
+    entry, body = get_log_body(log_index, debug)
+    if debug:
+        print(json.dumps(body, indent=4))
+    return entry, body
+
 
 def get_verification_proof(log_index, debug=False):
-    # TODO: verify that log index value is sane
-    pass
+    # verify that log index value is sane
+    if not isinstance(log_index, int) or log_index < 0:
+        raise ValueError(f"Invalid log index: {log_index}")
+
+    entry, _ = get_log_body(log_index, debug)
+    inclusion_proof = entry.get("verification", {}).get("inclusionProof")
+    if inclusion_proof is None:
+        raise ValueError(f"No inclusion proof found for log index {log_index}")
+
+    if debug:
+        print(json.dumps(inclusion_proof, indent=4))
+    return inclusion_proof
+
 
 def inclusion(log_index, artifact_filepath, debug=False):
-    # TODO::
     # verify that log index and artifact filepath values are sane
-    # extract_public_key(certificate)
-    # verify_artifact_signature(signature, public_key, artifact_filepath)
-    # get_verification_proof(log_index)
-    # verify_inclusion(DefaultHasher, index, tree_size, leaf_hash, hashes, root_hash)
-    pass
+    if not isinstance(log_index, int) or log_index < 0:
+        raise ValueError(f"Invalid log index: {log_index}")
+    if not artifact_filepath:
+        raise ValueError("Artifact filepath must be provided")
+
+    # 1. Fetch the entry and decode its body.
+    entry, body = get_log_entry(log_index, debug)
+
+    # 2. Extract signature and public key (certificate) from the body.
+    spec = body["spec"]
+    signature_b64 = spec["signature"]["content"]
+    cert_pem = spec["signature"]["publicKey"]["content"]
+
+    # The signature in the body is base64 encoded (without re-encoding the
+    # DER bytes), so decode it back into raw bytes.
+    signature = base64.b64decode(signature_b64)
+    # The public key content is a PEM-encoded certificate.
+    cert_der = base64.b64decode(cert_pem)
+
+    public_key = extract_public_key(cert_der)
+
+    # 3. Verify the signature in the log entry against the artifact.
+    verify_artifact_signature(signature, public_key, artifact_filepath)
+
+    # 4. Verify the inclusion proof.
+    proof = get_verification_proof(log_index, debug)
+    leaf_hash = compute_leaf_hash(entry["body"])
+
+    verify_inclusion(
+        DefaultHasher,
+        proof["logIndex"],       # index of the leaf within the tree
+        proof["treeSize"],       # total number of leaves in the tree
+        leaf_hash,
+        proof["hashes"],         # hashes forming the Merkle proof
+        proof["rootHash"],       # expected root hash
+        debug,
+    )
+    print(f"Inclusion verified for log index {log_index}")
+
 
 def get_latest_checkpoint(debug=False):
-    # TODO: Fetch the latest checkpoint from rekor
-    pass
+    # Fetch the latest checkpoint from rekor
+    url = f"{REKOR_BASE_URL}/api/v1/log"
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        log_info = json.loads(resp.read().decode("utf-8"))
+
+    checkpoint_text = log_info.get("signedTreeHead")
+    if not checkpoint_text:
+        raise ValueError("No signed tree head returned by Rekor")
+
+    # The signed tree head is a text blob containing the checkpoint lines.
+    lines = checkpoint_text.strip().split("\n")
+    if len(lines) < 3:
+        raise ValueError("Unexpected signed tree head format")
+
+    checkpoint = {
+        "treeID": log_info.get("treeID"),
+        "treeSize": int(lines[1]),
+        "rootHash": base64.b64decode(lines[2]).hex(),
+    }
+
+    if debug:
+        with open("checkpoint.json", "w") as f:
+            json.dump(checkpoint, f, indent=4)
+
+    return checkpoint
+
 
 def consistency(prev_checkpoint, debug=False):
-    # TODO: 
     # verify that prev checkpoint is not empty
-    # get_latest_checkpoint()
-    pass
+    if not prev_checkpoint:
+        raise ValueError("Previous checkpoint is empty")
+
+    # get latest checkpoint
+    latest = get_latest_checkpoint(debug)
+
+    # TODO: fetch consistency proof from Rekor using the two tree sizes.
+    # url = f"{REKOR_BASE_URL}/api/v1/log/entries?..." (consistency proof endpoint)
+    print("Consistency verification not yet implemented")
+    print("Previous checkpoint:", prev_checkpoint)
+    print("Latest checkpoint:", latest)
+
 
 def main():
     debug = False
