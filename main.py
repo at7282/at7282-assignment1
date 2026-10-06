@@ -3,8 +3,8 @@ import base64
 import json
 import urllib.request
 
-from merkle_proof import (DefaultHasher, compute_leaf_hash, verify_consistency,
-                          verify_inclusion)
+from merkle_proof import (DefaultHasher, compute_leaf_hash,
+                          verify_consistency, verify_inclusion)
 from util import extract_public_key, verify_artifact_signature
 
 
@@ -131,19 +131,69 @@ def get_latest_checkpoint(debug=False):
     return checkpoint
 
 
+def get_consistency_proof(first_size, last_size, tree_id, debug=False):
+    """Fetch the consistency proof between two tree sizes from Rekor."""
+    url = (f"{REKOR_BASE_URL}/api/v1/log/proof"
+           f"?firstSize={first_size}&lastSize={last_size}&treeID={tree_id}")
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        proof = json.loads(resp.read().decode("utf-8"))
+
+    if debug:
+        print(json.dumps(proof, indent=4))
+    return proof
+
+
 def consistency(prev_checkpoint, debug=False):
     # verify that prev checkpoint is not empty
     if not prev_checkpoint:
         raise ValueError("Previous checkpoint is empty")
 
+    # verify that the prev checkpoint has the required fields
+    required = ("treeID", "treeSize", "rootHash")
+    for field in required:
+        if field not in prev_checkpoint:
+            raise ValueError(f"Previous checkpoint is missing field: {field}")
+
     # get latest checkpoint
     latest = get_latest_checkpoint(debug)
 
-    # TODO: fetch consistency proof from Rekor using the two tree sizes.
-    # url = f"{REKOR_BASE_URL}/api/v1/log/entries?..." (consistency proof endpoint)
-    print("Consistency verification not yet implemented")
-    print("Previous checkpoint:", prev_checkpoint)
-    print("Latest checkpoint:", latest)
+    old_size = prev_checkpoint["treeSize"]
+    new_size = latest["treeSize"]
+
+    # ensure the two checkpoints are actually distinct
+    if old_size == new_size and prev_checkpoint["rootHash"] == latest["rootHash"]:
+        raise ValueError(
+            "Previous checkpoint is identical to the latest checkpoint; "
+            "wait for more entries to be added before verifying consistency."
+        )
+    if old_size >= new_size:
+        raise ValueError(
+            f"Previous tree size ({old_size}) is not smaller than "
+            f"latest tree size ({new_size})"
+        )
+    if prev_checkpoint["treeID"] != latest["treeID"]:
+        raise ValueError(
+            f"Tree ID mismatch: previous ({prev_checkpoint['treeID']}) vs "
+            f"latest ({latest['treeID']})"
+        )
+
+    # obtain the consistency proof from Rekor
+    proof = get_consistency_proof(
+        old_size, new_size, latest["treeID"], debug
+    )
+
+    # verify consistency using the merkle proof library
+    verify_consistency(
+        DefaultHasher,
+        old_size,                    # size of the older checkpoint
+        new_size,                    # size of the latest checkpoint
+        proof["hashes"],             # consistency proof hashes
+        prev_checkpoint["rootHash"], # older root hash
+        latest["rootHash"],          # latest root hash
+    )
+
+    print(f"Consistency verified between tree size {old_size} and {new_size}")
 
 
 def main():
