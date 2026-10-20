@@ -17,7 +17,7 @@ def test_create_artifact_writes_netid(tmp_path, monkeypatch):
 
     runpy.run_path(str(CREATE_ARTIFACT), run_name="__main__")
 
-    assert (tmp_path / "artifact.md").read_text(encoding="utf-8") == "at7282\n"
+    assert (tmp_path / "examples" / "artifact.md").read_text(encoding="utf-8") == "at7282\n"
 
 
 def test_create_artifact_requires_netid(tmp_path, monkeypatch):
@@ -27,7 +27,7 @@ def test_create_artifact_requires_netid(tmp_path, monkeypatch):
     with pytest.raises(SystemExit):
         runpy.run_path(str(CREATE_ARTIFACT), run_name="__main__")
 
-    assert not (tmp_path / "artifact.md").exists()
+    assert not (tmp_path / "examples" / "artifact.md").exists()
 
 
 def test_staged_files_returns_non_empty_paths(monkeypatch):
