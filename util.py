@@ -54,7 +54,7 @@ def verify_artifact_signature(signature, public_key, artifact_filename):
             data,
             ec.ECDSA(hashes.SHA256())
         )
-    except InvalidSignature as e:
-        print("Signature is invalid")
-    except Exception as e:
-        print("Exception in verifying artifact signature:", e)
+    except InvalidSignature as exc:
+        raise ValueError("Artifact signature is invalid") from exc
+
+    return True

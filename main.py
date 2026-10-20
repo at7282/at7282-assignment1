@@ -1,6 +1,8 @@
 import argparse
 import base64
 import json
+import sys
+import urllib.error
 import urllib.request
 
 from merkle_proof import (DefaultHasher, compute_leaf_hash,
@@ -9,15 +11,48 @@ from util import extract_public_key, verify_artifact_signature
 
 
 REKOR_BASE_URL = "https://rekor.sigstore.dev"
+REQUEST_TIMEOUT_SECONDS = 30
+
+
+class RekorError(Exception):
+    """Raised when a request to the Rekor server fails."""
+
+
+def fetch_json(url):
+    """Fetch and decode a JSON response from Rekor.
+
+    Raises:
+        RekorError: if the request fails, times out, or returns invalid JSON.
+    """
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS) as resp:
+            raw = resp.read().decode("utf-8")
+    except urllib.error.HTTPError as exc:
+        raise RekorError(
+            f"Rekor returned HTTP {exc.code} ({exc.reason}) for {url}"
+        ) from exc
+    except urllib.error.URLError as exc:
+        if isinstance(exc.reason, TimeoutError):
+            raise RekorError(
+                f"Request to {url} timed out after {REQUEST_TIMEOUT_SECONDS} seconds"
+            ) from exc
+        raise RekorError(f"Could not reach Rekor at {url}: {exc.reason}") from exc
+    except TimeoutError as exc:
+        raise RekorError(
+            f"Request to {url} timed out after {REQUEST_TIMEOUT_SECONDS} seconds"
+        ) from exc
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise RekorError(f"Rekor returned invalid JSON for {url}: {exc}") from exc
 
 
 def fetch_log_entry(log_index, debug=False):
     """Fetch a single log entry from Rekor for the given global log index."""
     url = f"{REKOR_BASE_URL}/api/v1/log/entries?logIndex={log_index}"
-    req = urllib.request.Request(url, headers={"Accept": "application/json"})
-    with urllib.request.urlopen(req) as resp:
-        raw = resp.read().decode("utf-8")
-    entries = json.loads(raw)
+    entries = fetch_json(url)
 
     # The API returns a map keyed by the entry UUID; there should be one entry.
     entries_list = list(entries.values())
@@ -73,15 +108,15 @@ def inclusion(log_index, artifact_filepath, debug=False):
     # 2. Extract signature and public key (certificate) from the body.
     spec = body["spec"]
     signature_b64 = spec["signature"]["content"]
-    cert_pem = spec["signature"]["publicKey"]["content"]
+    cert_pem64 = spec["signature"]["publicKey"]["content"]
 
     # The signature in the body is base64 encoded (without re-encoding the
     # DER bytes), so decode it back into raw bytes.
     signature = base64.b64decode(signature_b64)
-    # The public key content is a PEM-encoded certificate.
-    cert_der = base64.b64decode(cert_pem)
+    # The certificate is stored as base64-encoded PEM, so decode it into PEM.
+    cert_pem = base64.b64decode(cert_pem64)
 
-    public_key = extract_public_key(cert_der)
+    public_key = extract_public_key(cert_pem)
 
     # 3. Verify the signature in the log entry against the artifact.
     verify_artifact_signature(signature, public_key, artifact_filepath)
@@ -105,9 +140,7 @@ def inclusion(log_index, artifact_filepath, debug=False):
 def get_latest_checkpoint(debug=False):
     # Fetch the latest checkpoint from rekor
     url = f"{REKOR_BASE_URL}/api/v1/log"
-    req = urllib.request.Request(url, headers={"Accept": "application/json"})
-    with urllib.request.urlopen(req) as resp:
-        log_info = json.loads(resp.read().decode("utf-8"))
+    log_info = fetch_json(url)
 
     checkpoint_text = log_info.get("signedTreeHead")
     if not checkpoint_text:
@@ -125,8 +158,8 @@ def get_latest_checkpoint(debug=False):
     }
 
     if debug:
-        with open("checkpoint.json", "w") as f:
-            json.dump(checkpoint, f, indent=4)
+        print("Signed tree head:")
+        print(checkpoint_text)
 
     return checkpoint
 
@@ -135,9 +168,7 @@ def get_consistency_proof(first_size, last_size, tree_id, debug=False):
     """Fetch the consistency proof between two tree sizes from Rekor."""
     url = (f"{REKOR_BASE_URL}/api/v1/log/proof"
            f"?firstSize={first_size}&lastSize={last_size}&treeID={tree_id}")
-    req = urllib.request.Request(url, headers={"Accept": "application/json"})
-    with urllib.request.urlopen(req) as resp:
-        proof = json.loads(resp.read().decode("utf-8"))
+    proof = fetch_json(url)
 
     if debug:
         print(json.dumps(proof, indent=4))
@@ -226,17 +257,16 @@ def main():
         debug = True
         print("enabled debug mode")
     if args.checkpoint:
-        # get and print latest checkpoint from server
-        # if debug is enabled, store it in a file checkpoint.json
+        # Get and print the latest checkpoint from the server.
         checkpoint = get_latest_checkpoint(debug)
         print(json.dumps(checkpoint, indent=4))
-    if args.inclusion:
+    if args.inclusion is not None:
         inclusion(args.inclusion, args.artifact, debug)
     if args.consistency:
         if not args.tree_id:
             print("please specify tree id for prev checkpoint")
             return
-        if not args.tree_size:
+        if args.tree_size is None:
             print("please specify tree size for prev checkpoint")
             return
         if not args.root_hash:
@@ -251,4 +281,8 @@ def main():
         consistency(prev_checkpoint, debug)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (RekorError, ValueError, OSError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc
