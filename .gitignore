@@ -1,10 +1,49 @@
+# Byte-compiled files and tool caches
 __pycache__/
 *.py[cod]
-checkpoint.json
 .venv/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
-.coverage
-htmlcov/
+.tox/
+.nox/
+
+# Generated runtime output
+checkpoint.json
 rekor-*.zip
+
+# Coverage and test reports
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Secrets and local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa
+id_ed25519
+secrets/
+.credentials/
+credentials.json
+
+# Logs
+*.log
+logs/
+
+# Editor and operating system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

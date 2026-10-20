@@ -1,0 +1,202 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R] /Count 4 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 840 >>
+stream
+BT
+/F1 8.5 Tf
+11 TL
+1 0 0 1 45 742 Tm
+(PYTHON REKOR MONITOR) Tj T*
+(Security and Testing Evidence) Tj T*
+() Tj T*
+(Repository: at7282/at7282-assignment1) Tj T*
+(Generated: 2026-10-19) Tj T*
+() Tj T*
+(Contents) Tj T*
+(  1. TruffleHog detects and blocks a staged secret) Tj T*
+(  2. pytest test suite and coverage report) Tj T*
+(  3. Branch protection rule for main) Tj T*
+() Tj T*
+(These pages are terminal captures of the commands used to produce the) Tj T*
+(requested evidence. To capture equivalent screenshots, run the commands) Tj T*
+(in docs/REPRODUCING-EVIDENCE.md and capture the terminal window.) Tj T*
+() Tj T*
+(Section 1 uses a synthetic AWS credential and --no-verification.) Tj T*
+(Section 2 shows 67 passing tests and 95.98% line coverage.) Tj T*
+(Section 3 reads the live branch protection configuration from GitHub.) Tj T*
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 1816 >>
+stream
+BT
+/F1 8.5 Tf
+11 TL
+1 0 0 1 45 742 Tm
+(==============================================================================) Tj T*
+(1. TruffleHog detects and blocks a staged secret) Tj T*
+(==============================================================================) Tj T*
+() Tj T*
+(Source: docs/evidence/1-trufflehog-secret-detection.txt) Tj T*
+() Tj T*
+(Note: the synthetic AWS access key is redacted in this capture.) Tj T*
+() Tj T*
+(Command: git commit -m "Add fake credential" \(with leak-test.txt staged\)) Tj T*
+() Tj T*
+([WARNING] Unstaged files detected.) Tj T*
+([INFO] Stashing unstaged files to /home/andy/.cache/pre-commit/patch1792466566-12666.) Tj T*
+(TruffleHog \(staged changes only\).........................................Failed) Tj T*
+(- hook id: trufflehog-staged) Tj T*
+(- exit code: 183) Tj T*
+() Tj T*
+(???  TruffleHog. Unearth your secrets. ???) Tj T*
+() Tj T*
+(2026-10-19T23:22:48-04:00    info-0    trufflehog    running source    ) Tj T*
+({"source_manager_worker_id": "nM4UJ", "with_units": true}) Tj T*
+(Found unverified result ???) Tj T*
+(Detector Type: AWS) Tj T*
+(Decoder Type: PLAIN) Tj T*
+(Raw result: AKIA****************) Tj T*
+(Resource_type: Access key) Tj T*
+(File: /tmp/trufflehog-staged-waikj0t8/leak-test.txt) Tj T*
+(Line: 1) Tj T*
+() Tj T*
+(2026-10-19T23:22:48-04:00    info-0    trufflehog    finished scanning    {"chunks": 1, ) Tj T*
+("bytes": 106, "verified_secrets": 0, "unverified_secrets": 1, "scan_duration": "2.700299ms", ) Tj T*
+("trufflehog_version": "3.99.3", "verification_caching": ) Tj T*
+({"Hits":0,"Misses":0,"HitsWasted":0,"AttemptsSaved":0,"VerificationTimeSpentMS":0}}) Tj T*
+() Tj T*
+([INFO] Restored changes from /home/andy/.cache/pre-commit/patch1792466566-12666.) Tj T*
+() Tj T*
+(RESULT: commit blocked by the trufflehog-staged pre-commit hook) Tj T*
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 2253 >>
+stream
+BT
+/F1 8.5 Tf
+11 TL
+1 0 0 1 45 742 Tm
+(==============================================================================) Tj T*
+(2. pytest test suite and coverage report) Tj T*
+(==============================================================================) Tj T*
+() Tj T*
+(Source: docs/evidence/2-pytest-coverage.txt) Tj T*
+() Tj T*
+(Command: poetry run pytest) Tj T*
+() Tj T*
+(============================= test session starts ==============================) Tj T*
+(platform linux -- Python 3.14.4, pytest-9.1.1, pluggy-1.7.0) Tj T*
+(rootdir: /home/andy/python-rekor-monitor-template) Tj T*
+(configfile: pyproject.toml) Tj T*
+(testpaths: tests) Tj T*
+(plugins: platformdirs-4.13.5, cov-7.1.0) Tj T*
+(collected 67 items) Tj T*
+() Tj T*
+(tests/test_main.py .......................................               [ 58%]) Tj T*
+(tests/test_merkle_proof.py ............                                  [ 76%]) Tj T*
+(tests/test_scripts.py ...........                                        [ 92%]) Tj T*
+(tests/test_util.py .....                                                 [100%]) Tj T*
+() Tj T*
+(================================ tests coverage ================================) Tj T*
+(_______________ coverage: platform linux, python 3.14.4-final-0 ________________) Tj T*
+() Tj T*
+(Name                             Stmts   Miss  Cover   Missing) Tj T*
+(--------------------------------------------------------------) Tj T*
+(main.py                            156      9    94%   100, 167-168, 182, 305-309) Tj T*
+(merkle_proof.py                    118      3    97%   71, 110, 117) Tj T*
+(scripts/create_artifact.py           7      0   100%) Tj T*
+(scripts/scan_staged_secrets.py      47      2    96%   25, 104) Tj T*
+(util.py                             20      0   100%) Tj T*
+(--------------------------------------------------------------) Tj T*
+(TOTAL                              348     14    96%) Tj T*
+(Coverage HTML written to dir htmlcov) Tj T*
+(Coverage XML written to file coverage.xml) Tj T*
+(Required test coverage of 75% reached. Total coverage: 95.98%) Tj T*
+(============================== 67 passed in 0.14s ==============================) Tj T*
+() Tj T*
+(RESULT: all tests passed and coverage is above the 75% threshold) Tj T*
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 11 0 R >>
+endobj
+11 0 obj
+<< /Length 1871 >>
+stream
+BT
+/F1 8.5 Tf
+11 TL
+1 0 0 1 45 742 Tm
+(==============================================================================) Tj T*
+(3. Branch protection rule for main) Tj T*
+(==============================================================================) Tj T*
+() Tj T*
+(Source: docs/evidence/3-branch-protection.txt) Tj T*
+() Tj T*
+(Command: gh api repos/at7282/at7282-assignment1/branches/main/protection) Tj T*
+() Tj T*
+({"url":"https://api.github.com/repos/at7282/at7282-assignment1/branches/main/protection","requ) Tj T*
+(ired_pull_request_reviews":{"url":"https://api.github.com/repos/at7282/at7282-assignment1/bran) Tj T*
+(ches/main/protection/required_pull_request_reviews","dismiss_stale_reviews":true,"require_code) Tj T*
+(_owner_reviews":false,"require_last_push_approval":false,"required_approving_review_count":0},) Tj T*
+("required_signatures":{"url":"https://api.github.com/repos/at7282/at7282-assignment1/branches/) Tj T*
+(main/protection/required_signatures","enabled":false},"enforce_admins":{"url":"https://api.git) Tj T*
+(hub.com/repos/at7282/at7282-assignment1/branches/main/protection/enforce_admins","enabled":tru) Tj T*
+(e},"required_linear_history":{"enabled":true},"allow_force_pushes":{"enabled":false},"allow_de) Tj T*
+(letions":{"enabled":false},"block_creations":{"enabled":false},"required_conversation_resoluti) Tj T*
+(on":{"enabled":true},"lock_branch":{"enabled":false},"allow_fork_syncing":{"enabled":false}}) Tj T*
+(Summary of enabled rules for main:) Tj T*
+(- Pull request required before merging: yes) Tj T*
+(- Required approving reviews: 0 \(self-merge allowed for the sole maintainer\)) Tj T*
+(- Dismiss stale reviews: yes) Tj T*
+(- Require conversation resolution: yes) Tj T*
+(- Required linear history: yes) Tj T*
+(- Force pushes: disabled) Tj T*
+(- Branch deletions: disabled) Tj T*
+(- Rules enforced for administrators: yes) Tj T*
+ET
+endstream
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000140 00000 n 
+0000000235 00000 n 
+0000000361 00000 n 
+0000001252 00000 n 
+0000001378 00000 n 
+0000003246 00000 n 
+0000003372 00000 n 
+0000005677 00000 n 
+0000005805 00000 n 
+trailer
+<< /Size 12 /Root 1 0 R >>
+startxref
+7729
+%%EOF

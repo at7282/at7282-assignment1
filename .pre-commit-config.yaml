@@ -1,0 +1,20 @@
+# Install the hook once per clone:
+#   poetry run pre-commit install
+#
+# The secrets hook inspects only the files staged for the pending commit. It
+# never scans the full repository history, so commit time stays constant as the
+# project grows. The scanner invokes:
+#   trufflehog filesystem <staged-snapshot> --no-verification --fail
+# so detection works offline and a finding exits non-zero.
+repos:
+  - repo: local
+    hooks:
+      - id: trufflehog-staged
+        name: TruffleHog (staged changes only)
+        description: Detect secrets in the files staged for the next commit.
+        entry: python scripts/scan_staged_secrets.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        require_serial: true
+        stages: [pre-commit]

@@ -25,7 +25,10 @@ package-mode = false
 dev = [
     "ruff (>=0.17.1,<0.18.0)",
     "mypy (>=2.4.0,<3.0.0)",
-    "bandit (>=1.9.4,<2.0.0)"
+    "bandit (>=1.9.4,<2.0.0)",
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "pre-commit (>=4.7.0,<5.0.0)"
 ]
 
 [tool.ruff]
@@ -44,7 +47,7 @@ indent-style = "space"
 
 [tool.mypy]
 python_version = "3.11"
-files = ["main.py", "merkle_proof.py", "util.py"]
+files = ["main.py", "merkle_proof.py", "util.py", "scripts"]
 check_untyped_defs = true
 warn_unused_configs = true
 warn_redundant_casts = true
@@ -54,4 +57,22 @@ show_error_codes = true
 ignore_missing_imports = true
 
 [tool.bandit]
-exclude_dirs = ["*/.venv/*", "*/__pycache__/*", "*/.git/*"]
+exclude_dirs = ["*/.venv/*", "*/__pycache__/*", "*/.git/*", "*/tests/*"]
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=main",
+    "--cov=merkle_proof",
+    "--cov=util",
+    "--cov=scripts",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=75",
+]
