@@ -12,7 +12,7 @@ repos:
       - id: trufflehog-staged
         name: TruffleHog (staged changes only)
         description: Detect secrets in the files staged for the next commit.
-        entry: python scripts/scan_staged_secrets.py
+        entry: python3 scripts/scan_staged_secrets.py
         language: system
         pass_filenames: false
         always_run: true
