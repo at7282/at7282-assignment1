@@ -43,7 +43,7 @@ Add `--debug` to print the raw signed tree head and other diagnostic output.
 ### Verify an entry and its artifact signature
 
 ```console
-poetry run python main.py --inclusion <log-index> --artifact artifact.md
+poetry run python main.py --inclusion <log-index> --artifact examples/artifact.md
 ```
 
 The command fetches the log entry, extracts the signing certificate and signature,
@@ -155,6 +155,7 @@ maintainer; pull requests and linear history are still mandatory.
 - [`docs/REPRODUCING-EVIDENCE.md`](docs/REPRODUCING-EVIDENCE.md) — exact commands and a
   screenshot checklist for the TruffleHog, coverage, and branch protection evidence.
 - `docs/evidence/` — captured terminal output for each check.
+- `docs/evidence/tool-outputs/` — initial and final Ruff, mypy, and Bandit reports.
 - [`docs/evidence-report.pdf`](docs/evidence-report.pdf) — submission-ready PDF built
   from those captures.
 
@@ -169,11 +170,11 @@ python docs/build_evidence_pdf.py docs/evidence docs/evidence-report.pdf
 - `main.py` — command-line interface and Rekor API calls.
 - `merkle_proof.py` — Merkle inclusion and consistency proof verification.
 - `util.py` — certificate handling and artifact signature verification.
-- `scripts/create_artifact.py` — creates a simple `artifact.md` containing a NetID.
+- `scripts/create_artifact.py` — creates a simple `examples/artifact.md` containing a NetID.
 - `scripts/scan_staged_secrets.py` — staged-only TruffleHog pre-commit scanner.
 - `tests/` — pytest suite (unit tests with no network access).
-- `artifact.md`, `artifact.bundle`, `artifact.sigstore.json` — sample artifact and
-  signing material.
+- `examples/` — sample artifact (`artifact.md`) and its signing material
+  (`artifact.bundle`, `artifact.sigstore.json`).
 
 ## Security
 
