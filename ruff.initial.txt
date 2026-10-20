@@ -1,0 +1,143 @@
+I001 [*] Import block is un-sorted or un-formatted
+ --> main.py:1:1
+  |
+1 | / import argparse
+2 | | import base64
+3 | | import json
+4 | | import urllib.request
+5 | |
+6 | | from merkle_proof import (DefaultHasher, compute_leaf_hash,
+7 | |                           verify_consistency, verify_inclusion)
+8 | | from util import extract_public_key, verify_artifact_signature
+  | |______________________________________________________________^
+help: Organize imports
+  |
+5 |
+  - from merkle_proof import (DefaultHasher, compute_leaf_hash,
+  -                           verify_consistency, verify_inclusion)
+6 + from merkle_proof import DefaultHasher, compute_leaf_hash, verify_consistency, verify_inclusion
+7 | from util import extract_public_key, verify_artifact_signature
+  -
+8 |
+  |
+
+E501 Line too long (106 > 100)
+  --> main.py:25:101
+   |
+23 |     entries_list = list(entries.values())
+24 |     if len(entries_list) != 1:
+25 |         raise ValueError(f"Expected exactly one log entry for index {log_index}, got {len(entries_list)}")
+   |                                                                                                     ^^^^^^
+26 |
+27 |     return entries_list[0]
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> merkle_proof.py:1:1
+  |
+1 | / import hashlib
+2 | | import binascii
+3 | | import base64
+  | |_____________^
+4 |
+5 |   # domain separation prefixes according to the RFC
+  |
+help: Organize imports
+  |
+1 + import base64
+2 + import binascii
+3 | import hashlib
+  - import binascii
+  - import base64
+4 |
+  |
+
+E741 Ambiguous variable name: `l`
+  --> merkle_proof.py:25:29
+   |
+23 |         return h.digest()
+24 |
+25 |     def hash_children(self, l, r):
+   |                             ^
+26 |         h = self.new()
+27 |         b = bytes([RFC6962_NODE_HASH_PREFIX]) + l + r
+   |
+
+E501 Line too long (106 > 100)
+  --> merkle_proof.py:54:101
+   |
+52 |     if size1 == 0:
+53 |         if bytearray_proof:
+54 |             raise ValueError(f"expected empty bytearray_proof, but got {len(bytearray_proof)} components")
+   |                                                                                                     ^^^^^^
+55 |         return
+56 |     if not bytearray_proof:
+   |
+
+E501 Line too long (109 > 100)
+  --> merkle_proof.py:69:101
+   |
+68 |     if len(bytearray_proof) != start + inner + border:
+69 |         raise ValueError(f"wrong bytearray_proof size {len(bytearray_proof)}, want {start + inner + border}")
+   |                                                                                                     ^^^^^^^^^
+70 |
+71 |     bytearray_proof = bytearray_proof[start:]
+   |
+
+E501 Line too long (112 > 100)
+   --> merkle_proof.py:119:101
+    |
+118 |     def __str__(self):
+119 |         return f"calculated root:\n{self.calculated_root}\n does not match expected root:\n{self.expected_root}"
+    |                                                                                                     ^^^^^^^^^^^^
+120 |
+121 | def root_from_inclusion_proof(hasher, index, size, leaf_hash, proof):
+    |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> util.py:1:1
+  |
+1 | / from cryptography import x509
+2 | | from cryptography.hazmat.backends import default_backend
+3 | | from cryptography.hazmat.primitives import serialization
+4 | |
+5 | | from cryptography.hazmat.primitives import hashes
+6 | | from cryptography.hazmat.primitives.asymmetric import ec
+7 | | from cryptography.hazmat.primitives.serialization import load_pem_public_key
+8 | | from cryptography.exceptions import InvalidSignature
+  | |____________________________________________________^
+help: Organize imports
+  |
+1 | from cryptography import x509
+2 + from cryptography.exceptions import InvalidSignature
+3 | from cryptography.hazmat.backends import default_backend
+  - from cryptography.hazmat.primitives import serialization
+  -
+  - from cryptography.hazmat.primitives import hashes
+4 + from cryptography.hazmat.primitives import hashes, serialization
+5 | from cryptography.hazmat.primitives.asymmetric import ec
+6 | from cryptography.hazmat.primitives.serialization import load_pem_public_key
+  - from cryptography.exceptions import InvalidSignature
+7 |
+  |
+
+F841 [*] Local variable `e` is assigned to but never used
+  --> util.py:57:32
+   |
+55 |             ec.ECDSA(hashes.SHA256())
+56 |         )
+57 |     except InvalidSignature as e:
+   |                                ^
+58 |         print("Signature is invalid")
+59 |     except Exception as e:
+   |
+help: Remove assignment to unused variable `e`
+   |
+56 |         )
+   -     except InvalidSignature as e:
+57 +     except InvalidSignature:
+58 |         print("Signature is invalid")
+   |
+
+Found 9 errors.
+[*] 4 fixable with `--fix`.
