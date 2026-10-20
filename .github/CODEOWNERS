@@ -1,0 +1,20 @@
+# Default owner for everything in the repository.
+* @at7282
+
+# Application code and verification logic.
+/main.py @at7282
+/merkle_proof.py @at7282
+/util.py @at7282
+
+# Tooling, tests, and automation.
+/scripts/ @at7282
+/tests/ @at7282
+/.github/ @at7282
+/.pre-commit-config.yaml @at7282
+/pyproject.toml @at7282
+/poetry.lock @at7282
+
+# Security and contribution policies need owner review.
+/SECURITY.md @at7282
+/CONTRIBUTING.md @at7282
+/LICENSE @at7282
