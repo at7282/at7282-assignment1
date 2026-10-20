@@ -1,0 +1,2 @@
+merkle_proof.py:119: error: If x = b'abc' then f"{x}" or "{}".format(x) produces "b'abc'", not "abc". If this is desired behavior, use f"{x!r}" or "{!r}".format(x). Otherwise, decode the bytes  [str-bytes-safe]
+Found 1 error in 1 file (checked 3 source files)

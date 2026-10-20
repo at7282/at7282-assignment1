@@ -1,0 +1,51 @@
+Run started:2026-10-20 02:49:29.008510+00:00
+
+Test results:
+>> Issue: [B310:blacklist] Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+   Severity: Medium   Confidence: High
+   CWE: CWE-22 (https://cwe.mitre.org/data/definitions/22.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b310-urllib-urlopen
+   Location: main.py:18:9
+17	    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+18	    with urllib.request.urlopen(req) as resp:
+19	        raw = resp.read().decode("utf-8")
+
+--------------------------------------------------
+>> Issue: [B310:blacklist] Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+   Severity: Medium   Confidence: High
+   CWE: CWE-22 (https://cwe.mitre.org/data/definitions/22.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b310-urllib-urlopen
+   Location: main.py:109:9
+108	    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+109	    with urllib.request.urlopen(req) as resp:
+110	        log_info = json.loads(resp.read().decode("utf-8"))
+
+--------------------------------------------------
+>> Issue: [B310:blacklist] Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+   Severity: Medium   Confidence: High
+   CWE: CWE-22 (https://cwe.mitre.org/data/definitions/22.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b310-urllib-urlopen
+   Location: main.py:139:9
+138	    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+139	    with urllib.request.urlopen(req) as resp:
+140	        proof = json.loads(resp.read().decode("utf-8"))
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 340
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 0
+		Medium: 3
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 0
+		High: 3
+Files skipped (0):

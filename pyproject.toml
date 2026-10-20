@@ -1,0 +1,57 @@
+[project]
+name = "python-rekor-monitor"
+version = "0.1.0"
+description = "A command-line verifier for entries in the Sigstore Rekor transparency log."
+authors = [
+    {name = "Andy Then",email = "at7282@nyu.edu"}
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.11,<4.0"
+dependencies = [
+    "cryptography (>=50.0.2,<51.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+# This project is a collection of scripts, not an installable package.
+package-mode = false
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.17.1,<0.18.0)",
+    "mypy (>=2.4.0,<3.0.0)",
+    "bandit (>=1.9.4,<2.0.0)"
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+# pycodestyle (E), Pyflakes (F), import sorting (I),
+# bugbear (B), and pyupgrade (UP).
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.11"
+files = ["main.py", "merkle_proof.py", "util.py"]
+check_untyped_defs = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+show_error_codes = true
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = ["*/.venv/*", "*/__pycache__/*", "*/.git/*"]

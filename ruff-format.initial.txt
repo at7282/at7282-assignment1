@@ -1,0 +1,257 @@
+unformatted: File would be reformatted
+   --> main.py:6:26
+    |
+5   |
+    - from merkle_proof import (DefaultHasher, compute_leaf_hash,
+    -                           verify_consistency, verify_inclusion)
+6   + from merkle_proof import DefaultHasher, compute_leaf_hash, verify_consistency, verify_inclusion
+7   | from util import extract_public_key, verify_artifact_signature
+--------------------------------------------------------------------------------
+23  |     if len(entries_list) != 1:
+    -         raise ValueError(f"Expected exactly one log entry for index {log_index}, got {len(entries_list)}")
+24  +         raise ValueError(
+25  +             f"Expected exactly one log entry for index {log_index}, got {len(entries_list)}"
+26  +         )
+27  |
+--------------------------------------------------------------------------------
+95  |         DefaultHasher,
+    -         proof["logIndex"],       # index of the leaf within the tree
+    -         proof["treeSize"],       # total number of leaves in the tree
+96  +         proof["logIndex"],  # index of the leaf within the tree
+97  +         proof["treeSize"],  # total number of leaves in the tree
+98  |         leaf_hash,
+    -         proof["hashes"],         # hashes forming the Merkle proof
+    -         proof["rootHash"],       # expected root hash
+99  +         proof["hashes"],  # hashes forming the Merkle proof
+100 +         proof["rootHash"],  # expected root hash
+101 |         debug,
+--------------------------------------------------------------------------------
+136 |     """Fetch the consistency proof between two tree sizes from Rekor."""
+    -     url = (f"{REKOR_BASE_URL}/api/v1/log/proof"
+    -            f"?firstSize={first_size}&lastSize={last_size}&treeID={tree_id}")
+137 +     url = (
+138 +         f"{REKOR_BASE_URL}/api/v1/log/proof"
+139 +         f"?firstSize={first_size}&lastSize={last_size}&treeID={tree_id}"
+140 +     )
+141 |     req = urllib.request.Request(url, headers={"Accept": "application/json"})
+--------------------------------------------------------------------------------
+174 |         raise ValueError(
+    -             f"Previous tree size ({old_size}) is not smaller than "
+    -             f"latest tree size ({new_size})"
+175 +             f"Previous tree size ({old_size}) is not smaller than latest tree size ({new_size})"
+176 |         )
+--------------------------------------------------------------------------------
+183 |     # obtain the consistency proof from Rekor
+    -     proof = get_consistency_proof(
+    -         old_size, new_size, latest["treeID"], debug
+    -     )
+184 +     proof = get_consistency_proof(old_size, new_size, latest["treeID"], debug)
+185 |
+186 |     # verify consistency using the merkle proof library
+187 |     verify_consistency(
+188 |         DefaultHasher,
+    -         old_size,                    # size of the older checkpoint
+    -         new_size,                    # size of the latest checkpoint
+    -         proof["hashes"],             # consistency proof hashes
+    -         prev_checkpoint["rootHash"], # older root hash
+    -         latest["rootHash"],          # latest root hash
+189 +         old_size,  # size of the older checkpoint
+190 +         new_size,  # size of the latest checkpoint
+191 +         proof["hashes"],  # consistency proof hashes
+192 +         prev_checkpoint["rootHash"],  # older root hash
+193 +         latest["rootHash"],  # latest root hash
+194 |     )
+--------------------------------------------------------------------------------
+201 |     parser = argparse.ArgumentParser(description="Rekor Verifier")
+    -     parser.add_argument('-d', '--debug', help='Debug mode',
+    -                         required=False, action='store_true') # Default false
+    -     parser.add_argument('-c', '--checkpoint', help='Obtain latest checkpoint\
+    -                         from Rekor Server public instance',
+    -                         required=False, action='store_true')
+    -     parser.add_argument('--inclusion', help='Verify inclusion of an\
+202 +     parser.add_argument(
+203 +         "-d", "--debug", help="Debug mode", required=False, action="store_true"
+204 +     )  # Default false
+205 +     parser.add_argument(
+206 +         "-c",
+207 +         "--checkpoint",
+208 +         help="Obtain latest checkpoint\
+209 +                         from Rekor Server public instance",
+210 +         required=False,
+211 +         action="store_true",
+212 +     )
+213 +     parser.add_argument(
+214 +         "--inclusion",
+215 +         help="Verify inclusion of an\
+216 |                         entry in the Rekor Transparency Log using log index\
+217 |                         and artifact filename.\
+    -                         Usage: --inclusion 126574567',
+    -                         required=False, type=int)
+    -     parser.add_argument('--artifact', help='Artifact filepath for verifying\
+    -                         signature',
+    -                         required=False)
+    -     parser.add_argument('--consistency', help='Verify consistency of a given\
+    -                         checkpoint with the latest checkpoint.',
+    -                         action='store_true')
+    -     parser.add_argument('--tree-id', help='Tree ID for consistency proof',
+    -                         required=False)
+    -     parser.add_argument('--tree-size', help='Tree size for consistency proof',
+    -                         required=False, type=int)
+    -     parser.add_argument('--root-hash', help='Root hash for consistency proof',
+    -                         required=False)
+218 +                         Usage: --inclusion 126574567",
+219 +         required=False,
+220 +         type=int,
+221 +     )
+222 +     parser.add_argument(
+223 +         "--artifact",
+224 +         help="Artifact filepath for verifying\
+225 +                         signature",
+226 +         required=False,
+227 +     )
+228 +     parser.add_argument(
+229 +         "--consistency",
+230 +         help="Verify consistency of a given\
+231 +                         checkpoint with the latest checkpoint.",
+232 +         action="store_true",
+233 +     )
+234 +     parser.add_argument("--tree-id", help="Tree ID for consistency proof", required=False)
+235 +     parser.add_argument(
+236 +         "--tree-size", help="Tree size for consistency proof", required=False, type=int
+237 +     )
+238 +     parser.add_argument("--root-hash", help="Root hash for consistency proof", required=False)
+239 |     args = parser.parse_args()
+--------------------------------------------------------------------------------
+267 |
+268 +
+269 | if __name__ == "__main__":
+    |
+
+unformatted: File would be reformatted
+   --> merkle_proof.py:9:1
+    |
+8   |
+9   +
+10  | class Hasher:
+--------------------------------------------------------------------------------
+34  |
+35  +
+36  | # DefaultHasher is a SHA256 based LogHasher
+37  | DefaultHasher = Hasher(hashlib.sha256)
+38  |
+39  +
+40  | def verify_consistency(hasher, size1, size2, proof, root1, root2):
+--------------------------------------------------------------------------------
+56  |         if bytearray_proof:
+    -             raise ValueError(f"expected empty bytearray_proof, but got {len(bytearray_proof)} components")
+57  +             raise ValueError(
+58  +                 f"expected empty bytearray_proof, but got {len(bytearray_proof)} components"
+59  +             )
+60  |         return
+--------------------------------------------------------------------------------
+73  |     if len(bytearray_proof) != start + inner + border:
+    -         raise ValueError(f"wrong bytearray_proof size {len(bytearray_proof)}, want {start + inner + border}")
+74  +         raise ValueError(
+75  +             f"wrong bytearray_proof size {len(bytearray_proof)}, want {start + inner + border}"
+76  +         )
+77  |
+--------------------------------------------------------------------------------
+88  |
+89  +
+90  | def verify_match(calculated, expected):
+91  |     if calculated != expected:
+92  |         raise RootMismatchError(expected, calculated)
+93  |
+94  +
+95  | def decomp_incl_proof(index, size):
+96  |     inner = inner_proof_size(index, size)
+    -     border = bin(index >> inner).count('1')
+97  +     border = bin(index >> inner).count("1")
+98  |     return inner, border
+99  |
+100 +
+101 | def inner_proof_size(index, size):
+102 |     return (index ^ (size - 1)).bit_length()
+103 |
+104 +
+105 | def chain_inner(hasher, seed, proof, index):
+--------------------------------------------------------------------------------
+112 |
+113 +
+114 | def chain_inner_right(hasher, seed, proof, index):
+--------------------------------------------------------------------------------
+119 |
+120 +
+121 | def chain_border_right(hasher, seed, proof):
+--------------------------------------------------------------------------------
+125 |
+126 +
+127 | class RootMismatchError(Exception):
+--------------------------------------------------------------------------------
+134 |
+135 +
+136 | def root_from_inclusion_proof(hasher, index, size, leaf_hash, proof):
+--------------------------------------------------------------------------------
+164 |
+165 +
+166 | # requires entry["body"] output for a log entry
+    |
+
+unformatted: File would be reformatted
+  --> util.py:13:1
+   |
+12 | def extract_public_key(cert):
+   - # read the certificate
+   - #    with open("cert.pem", "rb") as cert_file:
+   - #        cert_data = cert_file.read()
+13 +     # read the certificate
+14 +     #    with open("cert.pem", "rb") as cert_file:
+15 +     #        cert_data = cert_file.read()
+16 |
+   - # load the certificate
+17 +     # load the certificate
+18 |     certificate = x509.load_pem_x509_certificate(cert, default_backend())
+19 |
+   - # extract the public key
+20 +     # extract the public key
+21 |     public_key = certificate.public_key()
+22 |
+   - # save the public key to a PEM file
+   - #    with open("cert_public.pem", "wb") as pub_key_file:
+   - #        pub_key_file.write(public_key.public_bytes(
+   - #            encoding=serialization.Encoding.PEM,
+   - #            format=serialization.PublicFormat.SubjectPublicKeyInfo
+   - #        ))
+23 +     # save the public key to a PEM file
+24 +     #    with open("cert_public.pem", "wb") as pub_key_file:
+25 +     #        pub_key_file.write(public_key.public_bytes(
+26 +     #            encoding=serialization.Encoding.PEM,
+27 +     #            format=serialization.PublicFormat.SubjectPublicKeyInfo
+28 +     #        ))
+29 |     pem_public_key = public_key.public_bytes(
+   -         encoding=serialization.Encoding.PEM,
+   -         format=serialization.PublicFormat.SubjectPublicKeyInfo
+30 +         encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
+31 |     )
+32 |
+33 |     return pem_public_key
+34 |
+35 +
+36 | def verify_artifact_signature(signature, public_key, artifact_filename):
+--------------------------------------------------------------------------------
+40 |
+   -         # load the signature
+41 +     # load the signature
+42 |     #    with open("hello.sig", "rb") as sig_file:
+--------------------------------------------------------------------------------
+51 |     try:
+   -         public_key.verify(
+   -             signature,
+   -             data,
+   -             ec.ECDSA(hashes.SHA256())
+   -         )
+52 +         public_key.verify(signature, data, ec.ECDSA(hashes.SHA256()))
+53 |     except InvalidSignature as e:
+   |
+
+3 files would be reformatted, 1 file already formatted
